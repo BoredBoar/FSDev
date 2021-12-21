@@ -14,23 +14,29 @@ const Button = ({handleClick, text}) => (
   </button>
 )
 
-const Statistics = ({title, good, neutral, bad}) => {
+const StatisticLine = ({text, value, unit}) => (
+  <tr><td>{text}</td><td>{value}{unit}</td></tr>
+)
+
+const Statistics = ({good, neutral, bad}) => {
   if (good+neutral+bad === 0) {
     return (
       <div>
-        <h1>{title}</h1>
         <div>No feedback given</div>
       </div>
     )
   }
   return (
     <div>
-      <h1>{title}</h1>
-      <div>good {good}</div>
-      <div>neutral {neutral}</div>
-      <div>bad {bad}</div>
-      <div>average {(good - bad)/(good + neutral + bad)}</div>
-      <div>positive {good/(good + neutral + bad) * 100} %</div>
+      <table>
+        <tbody>
+          <StatisticLine text="good" value={good} />
+          <StatisticLine text="neutral" value={neutral} />
+          <StatisticLine text="bad" value={bad} />
+          <StatisticLine text="average" value={((good - bad)/(good + neutral + bad)).toFixed(1)} />
+          <StatisticLine text="positive" value={((good)/(good + neutral + bad) * 100).toFixed(1)} unit="%" />
+        </tbody>
+      </table>
     </div>
   )
 }
@@ -65,6 +71,7 @@ const App = () => {
       <Button handleClick={() => newRating("good")} text="good" />
       <Button handleClick={() => newRating("neutral")} text="neutral" />
       <Button handleClick={() => newRating("bad")} text="bad" />
+      <h1>{statistics}</h1>
       <Statistics title={statistics} good={good} neutral={neutral} bad={bad}/>
     </div>
   )
