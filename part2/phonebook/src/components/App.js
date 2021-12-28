@@ -1,10 +1,44 @@
 import React, { useState } from 'react'
 
-const Filter = ({serch}) => {
+const Filter = ({handleFilterChange,newValue}) => {
   return (
     <div>
       <label>filter shown with </label>
-      <input value={newFilter} onChange={handleFilterChange} />
+      <input value={newValue} onChange={handleFilterChange} />
+    </div>
+  )
+}
+
+const PersonForm = ({submitPerson, updatedName, updatedNumber, nameChange, numberChange}) => {
+  return (
+    <div>
+      <form onSubmit={submitPerson}>
+        <div>
+          name: <input value={updatedName} onChange={nameChange} />
+        </div>
+        <div>
+          number: <input value={updatedNumber} onChange={numberChange} />
+        </div>
+        <div>
+          <button type="submit">add</button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+const Person = ({ person }) => {
+  return (
+    <div>{person.name} {person.number}</div>
+  )
+}
+
+const Persons = ({list}) => {
+  return (
+    <div>
+      {list.map(person => 
+        <Person key={person.id} person={person} />
+      )}
     </div>
   )
 }
@@ -31,6 +65,8 @@ const App = () => {
       }
       setPersons(persons.concat(newPerson))
       setNewName('')
+      setNewNumber('')
+      updateFilter(newFilter,persons.concat(newPerson))
     } else {
       alert(`${newName} is already added to phonebook`)
     }
@@ -45,52 +81,27 @@ const App = () => {
   }
 
   const handleFilterChange = (event) => {
-    setNewFilter(event.target.value)
-    setNewList(persons.filter(person => (person.name.toLowerCase().startsWith(event.target.value.toLowerCase()))))
+    var filterVal = event.target.value
+    setNewFilter(filterVal)
+    // setNewList(persons.filter(person => (person.name.toLowerCase().startsWith(event.target.value.toLowerCase()))))
+    updateFilter(event.target.value,persons)
   }
 
-  const PersonForm = () => {
-    return (
-      <div>
-        <form onSubmit={addPerson}>
-          <div>
-            name: <input value={newName} onChange={handleNameChange} />
-          </div>
-          <div>
-            number: <input value={newNumber} onChange={handleNumberChange} />
-          </div>
-          <div>
-            <button type="submit">add</button>
-          </div>
-        </form>
-      </div>
-    )
+  const updateFilter = (val,list) => {
+    setNewList(list.filter(person => (person.name.toLowerCase().startsWith(val.toLowerCase()))))
   }
 
-  const Person = ({ person }) => {
-    return (
-      <div>{person.name} {person.number}</div>
-    )
-  }
-
-  const Persons = () => {
-    return (
-      <div>
-        {filteredList.map(person => 
-          <Person key={person.id} person={person} />
-        )}
-      </div>
-    )
-  }
+  
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Filter />
+      <Filter handleFilterChange={handleFilterChange} newValue={newFilter} />
       <h3>Add a new</h3>
-      <PersonForm />
+      <PersonForm submitPerson={addPerson} updatedName={newName} 
+          updatedNumber={newNumber} nameChange={handleNameChange} numberChange={handleNumberChange} />
       <h3>Numbers</h3>
-      <Persons />
+      <Persons list={filteredList} />
     </div>
   )
 }
