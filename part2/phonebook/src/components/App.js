@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+const url = 'http://localhost:3001/persons'
 
 const Filter = ({handleFilterChange,newValue}) => {
   return (
@@ -58,16 +59,21 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
-    if(persons.filter(person => person.name === newName).length === 0) {
+    if(persons.filter(person => person.name.toLowerCase() === newName.toLowerCase()).length === 0) {
       const newPerson = {
         name: newName,
-        id: persons.length + 1,
+        // id: persons.length + 1,
         number: newNumber
       }
-      setPersons(persons.concat(newPerson))
-      setNewName('')
-      setNewNumber('')
-      updateFilter(newFilter,persons.concat(newPerson))
+      axios
+        .post(url,newPerson)
+        .then(response => {
+          console.log(response)
+          setPersons(persons.concat(response.data))
+          setNewName('')
+          setNewNumber('')
+          updateFilter(newFilter,persons.concat(response.data))
+        })
     } else {
       alert(`${newName} is already added to phonebook`)
     }
@@ -84,7 +90,6 @@ const App = () => {
   const handleFilterChange = (event) => {
     var filterVal = event.target.value
     setNewFilter(filterVal)
-    // setNewList(persons.filter(person => (person.name.toLowerCase().startsWith(event.target.value.toLowerCase()))))
     updateFilter(event.target.value,persons)
   }
 
@@ -95,7 +100,7 @@ const App = () => {
   useEffect(() => {
     console.log('effect')
     axios
-      .get('http://localhost:3001/persons')
+      .get(url)
       .then(response => {
         console.log('promise fulfilled')
         setPersons(response.data)
