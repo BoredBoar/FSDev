@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
-const url = 'http://localhost:3001/persons'
+import phonebookService from '../services/phonebook'
+
 
 const Filter = ({handleFilterChange,newValue}) => {
   return (
@@ -29,29 +29,27 @@ const PersonForm = ({submitPerson, updatedName, updatedNumber, nameChange, numbe
   )
 }
 
-const Person = ({ person }) => {
+const Person = ({ person, removePerson }) => {
   return (
-    <div>{person.name} {person.number}</div>
+    <div>
+      <label>{person.name} {person.number} </label>
+      <button onClick={() => removePerson(person.id)}>delete</button>
+    </div>
   )
 }
 
-const Persons = ({list}) => {
+const Persons = ({list, handleRemove}) => {
   return (
     <div>
       {list.map(person => 
-        <Person key={person.id} person={person} />
+        <Person key={person.id} person={person} removePerson={handleRemove} />
       )}
     </div>
   )
 }
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    // { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    // { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    // { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    // { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ]) 
+  const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
@@ -62,20 +60,23 @@ const App = () => {
     if(persons.filter(person => person.name.toLowerCase() === newName.toLowerCase()).length === 0) {
       const newPerson = {
         name: newName,
-        // id: persons.length + 1,
         number: newNumber
       }
-      axios
-        .post(url,newPerson)
-        .then(response => {
-          console.log(response)
-          setPersons(persons.concat(response.data))
-          setNewName('')
-          setNewNumber('')
-          updateFilter(newFilter,persons.concat(response.data))
-        })
+      phonebookService.create(newPerson).then(res => {
+        setPersons(persons.concat(res))
+        setNewNumber('')
+        setNewName('')
+        updateFilter(newFilter,persons.concat(res))
+      })
     } else {
-      alert(`${newName} is already added to phonebook`)
+      if(window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)){
+        const tmp = persons.find(person => person.name.toLowerCase() === newName.toLowerCase())
+        phonebookService.update({...tmp, name: newName, number: newNumber})
+          .then(res => {
+            setPersons(persons.filter(person => person.id !== tmp.id).concat(res))
+            updateFilter(newFilter,persons.filter(person => person.id !== tmp.id).concat(res))
+          })
+      }
     }
   }
   
@@ -97,15 +98,21 @@ const App = () => {
     setNewList(list.filter(person => (person.name.toLowerCase().startsWith(val.toLowerCase()))))
   }
 
+  const handleRemoveClick = id => {
+    if(window.confirm(`Delete ${persons.find(person => person.id === id).name}`)) {
+      phonebookService.remove(id).then(res => {
+        setPersons(persons.filter(person => person.id !== id))
+        updateFilter(newFilter,persons.filter(person => person.id !== id))
+      })
+    }
+  }
+
   useEffect(() => {
     console.log('effect')
-    axios
-      .get(url)
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
-        updateFilter('',response.data)
-      })
+    phonebookService.getAll().then(results => {
+      setPersons(results)
+      updateFilter(newFilter,results)
+    })
   }, [])
 
   return (
@@ -116,7 +123,7 @@ const App = () => {
       <PersonForm submitPerson={addPerson} updatedName={newName} 
           updatedNumber={newNumber} nameChange={handleNameChange} numberChange={handleNumberChange} />
       <h3>Numbers</h3>
-      <Persons list={filteredList} />
+      <Persons list={filteredList} handleRemove={handleRemoveClick} />
     </div>
   )
 }
