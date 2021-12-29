@@ -48,12 +48,25 @@ const Persons = ({list, handleRemove}) => {
   )
 }
 
+const Notification = ({message}) => {
+  if(message === null) {
+    return null
+  }
+
+  return (
+    <div className={message.type}>
+      {message.msg}
+    </div>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
   const [filteredList, setNewList] = useState(persons)
+  const [notifyMessage, setNotifyMessage] = useState(null)
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -67,6 +80,8 @@ const App = () => {
         setNewNumber('')
         setNewName('')
         updateFilter(newFilter,persons.concat(res))
+        setNotifyMessage({msg: `Added ${res.name}`, type: 'success'})
+        setTimeout(() => {setNotifyMessage(null)}, 5000)
       })
     } else {
       if(window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)){
@@ -75,6 +90,9 @@ const App = () => {
           .then(res => {
             setPersons(persons.filter(person => person.id !== tmp.id).concat(res))
             updateFilter(newFilter,persons.filter(person => person.id !== tmp.id).concat(res))
+          })
+          .catch(err => {
+            setNotifyMessage({msg: `Information of ${newName} has already been removed from server`, type: 'error'})
           })
       }
     }
@@ -118,6 +136,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notifyMessage} />
       <Filter handleFilterChange={handleFilterChange} newValue={newFilter} />
       <h3>Add a new</h3>
       <PersonForm submitPerson={addPerson} updatedName={newName} 

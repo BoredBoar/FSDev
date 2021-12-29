@@ -24,11 +24,6 @@
       "name": "john doe",
       "number": "123456",
       "id": 5
-    },
-    {
-      "name": "Jane Doe",
-      "number": "123-456-7894",
-      "id": 6
     }
   ]
 }
