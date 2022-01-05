@@ -82,6 +82,10 @@ const App = () => {
         updateFilter(newFilter,persons.concat(res))
         setNotifyMessage({msg: `Added ${res.name}`, type: 'success'})
         setTimeout(() => {setNotifyMessage(null)}, 5000)
+      }).catch(err => {
+        setNotifyMessage({msg: err.response.data.error, type: 'error'})
+        setTimeout(() => {setNotifyMessage(null)}, 5000)
+        console.log(`Error received: ${err.response.data.error}`)
       })
     } else {
       if(window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)){
@@ -92,7 +96,8 @@ const App = () => {
             updateFilter(newFilter,persons.filter(person => person.id !== tmp.id).concat(res))
           })
           .catch(err => {
-            setNotifyMessage({msg: `Information of ${newName} has already been removed from server`, type: 'error'})
+            setNotifyMessage({msg: err.response.data.error, type: 'error'})
+            setTimeout(() => {setNotifyMessage(null)}, 5000)
           })
       }
     }
@@ -121,6 +126,9 @@ const App = () => {
       phonebookService.remove(id).then(res => {
         setPersons(persons.filter(person => person.id !== id))
         updateFilter(newFilter,persons.filter(person => person.id !== id))
+      }).catch(err => {
+        setNotifyMessage({msg: err.response.data.error, type: 'error'})
+        setTimeout(() => {setNotifyMessage(null)}, 5000)
       })
     }
   }

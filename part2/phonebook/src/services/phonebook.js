@@ -1,5 +1,5 @@
 import axios from 'axios'
-const url = 'https://cryptic-shelf-25222.herokuapp.com/api/persons'
+const url = '/api/persons'
 
 const getAll =  () => {
     const request = axios.get(url)
