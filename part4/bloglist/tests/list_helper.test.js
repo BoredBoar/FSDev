@@ -143,3 +143,29 @@ test('dummy returns one', () => {
       })
     })
   })
+
+  describe('most likes', () => {
+    test('when list is empty, most likes should be an object with empty author', () => {
+      const result = listHelper.mostLikes([])
+      expect(result).toEqual({
+        author: null,
+        likes: 0
+      })
+    })
+
+    test('when list is single blog, return blog author with number of likes', () => {
+      const result = listHelper.mostLikes(listWithOneBlog)
+      expect(result).toEqual({
+        author: 'Edsger W. Dijkstra',
+        likes: 5
+      })
+    })
+
+    test('find author with the most likes in a list of blogs', () => {
+      const result = listHelper.mostLikes(blogs)
+      expect(result).toEqual({
+        author: "Edsger W. Dijkstra",
+        likes: 17
+      })
+    })
+  })

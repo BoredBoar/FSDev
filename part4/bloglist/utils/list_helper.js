@@ -22,24 +22,33 @@ const totalLikes = (blogs) => {
 
  const mostBlogs = (blogs) => {
         blogsByAuthor = _.countBy(blogs, 'author')
-        console.log(blogsByAuthor)
         const most = _.reduce(blogsByAuthor, (max, value, key) => {
             if(value > max.blogs) {
                 return {author:key, blogs:value}
             }
             return max
         }, {author:null, blogs:0})
-        console.log(most)
         return most
  }
 
  const mostLikes = (blogs) => {
-     
+     const totals = _.reduce(blogs, (totalLikes, blog) => {
+        totalLikes[blog.author] = ((totalLikes[blog.author] || 0) + blog.likes)
+        return totalLikes
+     },{})
+     const most = _.reduce(totals, (max, value, key) => {
+        if(value > max.likes) {
+            return {author:key, likes:value}
+        }
+        return max
+     },{author:null,likes:0})
+     return most
  }
   
   module.exports = {
     dummy,
     totalLikes,
     favoriteBlog,
-    mostBlogs
+    mostBlogs,
+    mostLikes
   }
