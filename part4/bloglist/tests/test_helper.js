@@ -39,9 +39,16 @@ const initialBlogs = [
       }  
 ]
 
+const newBlog = {
+  title: "Did You Know",
+  author: "Stan the Mann",
+  url: "http://blog.ouhealth.com/DYK.html",
+  likes: 25896,
+}
+
 const blogsInDb = async () => {
     const blogs = await Blog.find({})
     return blogs.map(blog => blog.toJSON())
 }
 
-module.exports = { initialBlogs, blogsInDb}
+module.exports = { initialBlogs, blogsInDb, newBlog}

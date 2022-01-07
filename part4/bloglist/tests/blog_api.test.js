@@ -6,6 +6,7 @@ const Blog = require('../models/blog')
 const helper = require('./test_helper')
 const _ = require('lodash')
 const listHelper = require('../utils/list_helper')
+const { response } = require('express')
 
 beforeEach(async () => {
     await Blog.deleteMany({})
@@ -16,7 +17,7 @@ beforeEach(async () => {
     await Promise.all(promiseArray)
   })
 
-describe('/api/blogs route', () => {
+describe('GET /api/blogs route', () => {
     test('blogs are returned as json', async () => {
         await api
           .get('/api/blogs')
@@ -24,12 +25,31 @@ describe('/api/blogs route', () => {
           .expect('Content-Type', /application\/json/)
       })
 
+    test('all blogs are returned', async () => {
+        const response = await api.get('/api/blogs')
+
+        expect(response.body).toHaveLength(helper.initialBlogs.length)
+    })
+
     test('blogs are returned with an :id field', async () => {
-        const blogs = await api.get('/api/blogs')
+        const response = await api.get('/api/blogs')
+        const blogs = response.body
 
         const blogsHaveId = _.reduce(blogs, blog => {
             return _.has(blog,'id')
         },true)
+    })
+})
+
+describe('POST /api/blogs route', () => {
+    test('posting to the API creates results in the correct number of blogs', async () => {
+        const response = await api.post('/api/blogs').send(helper.newBlog)
+        const getResponse = await api.get('/api/blogs')
+        expect(getResponse.body).toHaveLength(helper.initialBlogs.length + 1)
+    })
+    test('posting to the API returns the corect blog', async () => {
+        const response = await api.post('/api/blogs').send(helper.newBlog)
+        expect(response.body).toMatchObject(helper.newBlog)
     })
 })
 
