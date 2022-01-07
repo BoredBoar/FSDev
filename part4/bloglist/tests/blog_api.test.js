@@ -47,9 +47,15 @@ describe('POST /api/blogs route', () => {
         const getResponse = await api.get('/api/blogs')
         expect(getResponse.body).toHaveLength(helper.initialBlogs.length + 1)
     })
+
     test('posting to the API returns the corect blog', async () => {
         const response = await api.post('/api/blogs').send(helper.newBlog)
         expect(response.body).toMatchObject(helper.newBlog)
+    })
+
+    test('posting a blog missing likes returns likes = 0', async () => {
+        const response = await api.post('/api/blogs').send(helper.blogMissingLikes)
+        expect(response.body).toMatchObject({...helper.blogMissingLikes, likes:0})
     })
 })
 

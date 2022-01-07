@@ -46,9 +46,15 @@ const newBlog = {
   likes: 25896,
 }
 
+const blogMissingLikes = {
+  title: "No one likes me",
+  author: "Fred Plue",
+  url: "http://blog.ouhealth.com/fred.html",
+}
+
 const blogsInDb = async () => {
     const blogs = await Blog.find({})
     return blogs.map(blog => blog.toJSON())
 }
 
-module.exports = { initialBlogs, blogsInDb, newBlog}
+module.exports = { initialBlogs, blogsInDb, newBlog, blogMissingLikes}
