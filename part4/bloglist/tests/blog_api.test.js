@@ -57,6 +57,16 @@ describe('POST /api/blogs route', () => {
         const response = await api.post('/api/blogs').send(helper.blogMissingLikes)
         expect(response.body).toMatchObject({...helper.blogMissingLikes, likes:0})
     })
+
+    test('posting a blog missing Title results in status 400', async () => {
+        const response = await api.post('/api/blogs').send(helper.blogMissingTitle)
+        expect(response.status).toBe(400)
+    })
+
+    test('posting a blog missing url results in status 400', async () => {
+        const response = await api.post('/api/blogs').send(helper.blogMissingUrl)
+        expect(response.status).toBe(400)
+    })
 })
 
   

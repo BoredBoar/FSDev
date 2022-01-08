@@ -52,6 +52,18 @@ const blogMissingLikes = {
   url: "http://blog.ouhealth.com/fred.html",
 }
 
+const blogMissingTitle = {
+  author: "Fred Plue",
+  url: "http://blog.ouhealth.com/fred.html",
+  likes: 0
+}
+
+const blogMissingUrl = {
+  title: "No one likes me",
+  author: "Fred Plue",
+  likes: 0
+}
+
 const blogsInDb = async () => {
     const blogs = await Blog.find({})
     return blogs.map(blog => blog.toJSON())
