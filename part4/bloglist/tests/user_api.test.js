@@ -7,7 +7,7 @@ const User = require('../models/user')
 const helper = require('./test_helper')
 
 describe('when there is initially one user in db', () => {
-    beforeEach(async () => {
+    beforeAll(async () => {
       await User.deleteMany({})
   
       const passwordHash = await bcrypt.hash('sekret', 10)
@@ -33,7 +33,58 @@ describe('when there is initially one user in db', () => {
       const usernames = usersAtEnd.map(u => u.username)
       expect(usernames).toContain(newUser.username)
     })
+
+    test('creation of a duplicate username fails', async () => {
+        const dupUser = helper.newUser
+  
+        await api
+          .post('/api/users')
+          .send(dupUser)
+          .expect(400)
+      })
+
+      test('creating a user without a username fails', async () => {
+        
+        const noUsername = { password: 'This should fail' }
+  
+        await api
+          .post('/api/users')
+          .send(noUsername)
+          .expect(400)
+      })
+
+      test('creating a user with a short username should fail', async () => {
+        
+        const noUsername = { username: 'sa', password: 'This should fail' }
+  
+        await api
+          .post('/api/users')
+          .send(noUsername)
+          .expect(400)
+      })
+
+      test('creating a user without a password should fail', async () => {
+        
+        const noUsername = { username: 'Nopassword' }
+  
+        await api
+          .post('/api/users')
+          .send(noUsername)
+          .expect(400)
+      })
+
+      test('creating a user with a short password should fail', async () => {
+        
+        const noUsername = { username: 'Nopassword', password: 'n0' }
+  
+        await api
+          .post('/api/users')
+          .send(noUsername)
+          .expect(400)
+      })
   })
+
+  
 
   afterAll(() => {
     mongoose.connection.close()
