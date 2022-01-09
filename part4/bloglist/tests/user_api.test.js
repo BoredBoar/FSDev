@@ -4,7 +4,10 @@ const app = require('../app')
 const api = supertest(app)
 const bcrypt = require('bcrypt')
 const User = require('../models/user')
+const Blog = require('../models/blog')
 const helper = require('./test_helper')
+const { request } = require('express')
+const _ = require('lodash')
 
 describe('when there is initially one user in db', () => {
     beforeAll(async () => {
@@ -82,6 +85,41 @@ describe('when there is initially one user in db', () => {
           .send(noUsername)
           .expect(400)
       })
+  })
+
+  describe('after adding user and blogs, make sure blogs are listed when getting user', () => {
+    beforeAll(async () => {
+        await Blog.deleteMany({})
+        await User.deleteMany({})
+        console.log(`Test DB cleared`)
+
+        const passwordHash = await bcrypt.hash('sekret', 10)
+        const newUser = new User({ username: 'root', passwordHash })
+
+        await newUser.save()
+
+        const users = await helper.usersInDb()
+        const user = users[0].id
+    
+        await api.post('/api/blogs').send({...helper.initialBlogs[0],user})
+        await api.post('/api/blogs').send({...helper.initialBlogs[1],user})
+        await api.post('/api/blogs').send({...helper.initialBlogs[2],user})
+        await api.post('/api/blogs').send({...helper.initialBlogs[3],user})
+    })
+
+    test('call to /api/users should return blogs as well', async () => {
+        
+        const response = await api.get('/api/users')
+        const users = response.body
+
+        console.log(`Users: ${JSON.stringify(users)}`)
+
+        _.reduce(users, (res,user) => {
+            return _.reduce(user.blogs, (x, blog) => {_.has(blog,'title') && x},true) && res
+        },true)
+
+        expect(users[0].blogs).toHaveLength(4)
+    })
   })
 
   
