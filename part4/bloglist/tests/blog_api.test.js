@@ -69,6 +69,30 @@ describe('POST /api/blogs route', () => {
     })
 })
 
+describe('GET /api/ID route', () => {
+    test('requesting a blog ID returns the correct blog', async () => {
+        const response = await api.get('/api/blogs')
+        const blogs = response.body
+
+        const responseWithId = await api.get(`/api/blogs/${blogs[3].id}`)
+        expect(responseWithId.body).toMatchObject(blogs[3])
+    })
+})
+
+describe('DELETE /api/ID route', () => {
+    test('deleting a blog post removes it from the list', async () => {
+        const response = await api.get('/api/blogs')
+        const blogs = response.body
+
+        const responseWithId = await api.delete(`/api/blogs/${blogs[3].id}`)
+
+        const responseAfterDelete = await api.get('/api/blogs')
+        const afterblogs = responseAfterDelete.body
+        expect(afterblogs).toHaveLength(blogs.length - 1)
+        expect(_.filter(afterblogs,{id: blogs[3].id})).toHaveLength(0)
+    })
+})
+
   
 afterAll(() => {
 mongoose.connection.close()
