@@ -122,6 +122,23 @@ describe('when there is initially one user in db', () => {
     })
   })
 
+  describe('Test login functionality', () => {
+    beforeAll(async () => {
+      await User.deleteMany({})
+  
+      const passwordHash = await bcrypt.hash('sekret', 10)
+      const user = new User({ username: 'root', passwordHash })
+  
+      await user.save()
+    })
+    test('root user logs in and recieves a token', async () => {
+        const response = await api.post('/api/login').send({username:'root',password:'sekret'})
+        const body = response.body
+        expect(body.token).not.toBeNull()
+        expect(body.username).toBe('root')
+    })
+})
+
   
 
   afterAll(() => {
