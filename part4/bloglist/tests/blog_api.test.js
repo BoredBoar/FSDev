@@ -20,6 +20,11 @@ beforeAll(async () => {
 
     await newUser.save()
 
+    const passwordHash2 = await bcrypt.hash('sekret2', 10)
+    const newUser2 = new User({ username: 'notroot', passwordHash: passwordHash2 })
+
+    await newUser2.save()
+
     const users = await helper.usersInDb()
     const user = users[0].id
   
@@ -83,6 +88,7 @@ describe('POST /api/blogs route', () => {
         const loginResponse = await api.post('/api/login').send({username:'root',password:'sekret'})
         const token = loginResponse.body.token
         const response = await api.post('/api/blogs').set({authorization:`bearer ${token}`}).send({...helper.newBlog})
+        console.log(JSON.stringify(response.body),JSON.stringify(helper.newBlog));
         expect(response.body).toMatchObject({...helper.newBlog})
     })
 
@@ -126,12 +132,27 @@ describe('DELETE /api/ID route', () => {
         const response = await api.get('/api/blogs')
         const blogs = response.body
 
-        const responseWithId = await api.delete(`/api/blogs/${blogs[3].id}`)
+        const loginResponse = await api.post('/api/login').send({username:'root',password:'sekret'})
+        const token = loginResponse.body.token
+
+        const responseWithId = await api.delete(`/api/blogs/${blogs[3].id}`).set({authorization:`bearer ${token}`})
 
         const responseAfterDelete = await api.get('/api/blogs')
         const afterblogs = responseAfterDelete.body
         expect(afterblogs).toHaveLength(blogs.length - 1)
         expect(_.filter(afterblogs,{id: blogs[3].id})).toHaveLength(0)
+    })
+
+    test('deleting a blog post by a nonauthor fails', async () => {
+        const response = await api.get('/api/blogs')
+        const blogs = response.body
+
+        const loginResponse = await api.post('/api/login').send({username:'notroot',password:'sekret2'})
+        const token = loginResponse.body.token
+
+        const responseDel = await api.delete(`/api/blogs/${blogs[3].id}`).set({authorization:`bearer ${token}`})
+
+        expect(responseDel.status).toBe(403)
     })
 })
 
