@@ -66,39 +66,44 @@ describe('GET /api/blogs route', () => {
 })
 
 describe('POST /api/blogs route', () => {
+    test('posting to the API without a token results in a status of 401', async () => {
+        const response = await api.post('/api/blogs').set({authorization:`bearer `}).send({...helper.newBlog})
+        expect(response.status).toBe(401)
+    })
+
     test('posting to the API creates results in the correct number of blogs', async () => {
-        const users = await helper.usersInDb()
-        const user = users[0].id
-        const response = await api.post('/api/blogs').send({...helper.newBlog,user})
+        const loginResponse = await api.post('/api/login').send({username:'root',password:'sekret'})
+        const token = loginResponse.body.token
+        const response = await api.post('/api/blogs').set({authorization:`bearer ${token}`}).send({...helper.newBlog})
         const getResponse = await api.get('/api/blogs')
         expect(getResponse.body).toHaveLength(helper.initialBlogs.length + 1)
     })
 
     test('posting to the API returns the corect blog', async () => {
-        const users = await helper.usersInDb()
-        const user = users[0].id
-        const response = await api.post('/api/blogs').send({...helper.newBlog,user})
-        expect(response.body).toMatchObject({...helper.newBlog,user})
+        const loginResponse = await api.post('/api/login').send({username:'root',password:'sekret'})
+        const token = loginResponse.body.token
+        const response = await api.post('/api/blogs').set({authorization:`bearer ${token}`}).send({...helper.newBlog})
+        expect(response.body).toMatchObject({...helper.newBlog})
     })
 
     test('posting a blog missing likes returns likes = 0', async () => {
-        const users = await helper.usersInDb()
-        const user = users[0].id
-        const response = await api.post('/api/blogs').send({...helper.blogMissingLikes,user})
-        expect(response.body).toMatchObject({...helper.blogMissingLikes, likes:0, user})
+        const loginResponse = await api.post('/api/login').send({username:'root',password:'sekret'})
+        const token = loginResponse.body.token
+        const response = await api.post('/api/blogs').set({authorization:`bearer ${token}`}).send({...helper.blogMissingLikes})
+        expect(response.body).toMatchObject({...helper.blogMissingLikes, likes:0})
     })
 
     test('posting a blog missing Title results in status 400', async () => {
-        const users = await helper.usersInDb()
-        const user = users[0].id
-        const response = await api.post('/api/blogs').send({...helper.blogMissingTitle,user})
+        const loginResponse = await api.post('/api/login').send({username:'root',password:'sekret'})
+        const token = loginResponse.body.token
+        const response = await api.post('/api/blogs').set({authorization:`bearer ${token}`}).send({...helper.blogMissingTitle})
         expect(response.status).toBe(400)
     })
 
     test('posting a blog missing url results in status 400', async () => {
-        const users = await helper.usersInDb()
-        const user = users[0].id
-        const response = await api.post('/api/blogs').send({...helper.blogMissingUrl,user})
+        const loginResponse = await api.post('/api/login').send({username:'root',password:'sekret'})
+        const token = loginResponse.body.token
+        const response = await api.post('/api/blogs').set({authorization:`bearer ${token}`}).send({...helper.blogMissingUrl})
         expect(response.status).toBe(400)
     })
 })
